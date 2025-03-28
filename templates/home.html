@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block title %}GroupBuy | Wholesale Prices Through Group Buying{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Banner -->
+    <div class="row mb-5 mt-3">
+        <div class="col-md-12">
+            <div class="bg-primary text-white p-5 rounded-3 position-relative banner">
+                <div class="row">
+                    <div class="col-md-7">
+                        <h1 class="display-4 fw-bold">Wholesale Prices For Everyone</h1>
+                        <p class="fs-5">Join our group buying platform to unlock wholesale prices on premium products without being a business. Pay just 5% to join the waitlist.</p>
+                        <a href="{% url 'product_list' %}" class="btn btn-light btn-lg fw-bold">Shop Now</a>
+                    </div>
+                    <div class="col-md-5 d-none d-md-block">
+                        <div class="banner-graphic">
+                            <i class="fas fa-users fa-5x"></i>
+                            <i class="fas fa-plus fa-3x"></i>
+                            <i class="fas fa-box-open fa-5x"></i>
+                            <i class="fas fa-equals fa-3x"></i>
+                            <i class="fas fa-piggy-bank fa-5x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>How Group Buying Works</h2>
+            <p class="text-muted">Three simple steps to unlock wholesale prices</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="display-3 mb-3 text-primary">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>1. Find Products</h3>
+                    <p class="card-text">Browse our catalog of premium products at wholesale prices. See how many people are needed to unlock the deal.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="display-3 mb-3 text-primary">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <h3>2. Join With 5% Deposit</h3>
+                    <p class="card-text">Reserve your spot with just a 5% deposit. No more payment until the Minimum Order Quantity (MOQ) is reached.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="display-3 mb-3 text-primary">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <h3>3. Get Your Products</h3>
+                    <p class="card-text">Once enough people join, the order is fulfilled and shipped. Pay the remainder and enjoy wholesale savings!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Products -->
+    <div class="row mb-5">
+        <div class="col-12 d-flex justify-content-between align-items-center mb-4">
+            <h2>Featured Products</h2>
+            <a href="{% url 'product_list' %}" class="btn btn-outline-primary">View All</a>
+        </div>
+        
+        {% for product in featured_products %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    {% with image=product.images.filter.first %}
+                        {% if image %}
+                            <div class="product-image-container">
+                                <img src="{{ image.image }}" class="card-img-top" alt="{{ image.alt_text|default:product.title }}">
+                            </div>
+                        {% else %}
+                            <div class="product-image-container bg-light d-flex align-items-center justify-content-center">
+                                <i class="fas fa-image fa-3x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.title }}</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="text-muted text-decoration-line-through">${{ product.market_price }}</span>
+                                <span class="fw-bold text-primary ms-2">${{ product.wholesale_price }}</span>
+                            </div>
+                            <span class="badge bg-success">{{ product.get_discount_percentage }}% OFF</span>
+                        </div>
+                        <div class="d-grid">
+                            <a href="{{ product.get_absolute_url }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Active Group Buys -->
+    <div class="row mb-5">
+        <div class="col-12 mb-4">
+            <h2>Active Group Buys</h2>
+            <p class="text-muted">Join these active campaigns and help reach the MOQ!</p>
+        </div>
+        
+        {% for batch in active_batches %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title">{{ batch.product.title }}</h5>
+                                <p class="card-text">
+                                    <span class="text-muted">Market Price: </span>${{ batch.product.market_price }}<br>
+                                    <span class="text-muted">Wholesale Price: </span><span class="fw-bold text-primary">${{ batch.product.wholesale_price }}</span>
+                                </p>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ batch.get_progress_percentage }}%;" 
+                                        aria-valuenow="{{ batch.get_progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                        {{ batch.get_progress_percentage }}%
+                                    </div>
+                                </div>
+                                <p class="small text-muted">
+                                    {{ batch.current_quantity }} of {{ batch.target_quantity }} orders - 
+                                    Need {{ batch.get_remaining_quantity }} more!
+                                </p>
+                                <a href="{{ batch.product.get_absolute_url }}" class="btn btn-sm btn-primary">Join Now</a>
+                            </div>
+                            <div class="col-md-4">
+                                {% with image=batch.product.images.filter.first %}
+                                    {% if image %}
+                                        <img src="{{ image.image }}" class="img-fluid rounded" alt="{{ image.alt_text|default:batch.product.title }}">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100px;">
+                                            <i class="fas fa-image fa-2x text-secondary"></i>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Trending Products -->
+    <div class="row mb-5">
+        <div class="col-12 mb-4">
+            <h2>Trending Products</h2>
+            <p class="text-muted">Our most popular group buys</p>
+        </div>
+        
+        {% for product in trending_products %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    {% with image=product.images.filter.first %}
+                        {% if image %}
+                            <div class="product-image-container">
+                                <img src="{{ image.image }}" class="card-img-top" alt="{{ image.alt_text|default:product.title }}">
+                            </div>
+                        {% else %}
+                            <div class="product-image-container bg-light d-flex align-items-center justify-content-center">
+                                <i class="fas fa-image fa-3x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.title }}</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="text-muted text-decoration-line-through">${{ product.market_price }}</span>
+                                <span class="fw-bold text-primary ms-2">${{ product.wholesale_price }}</span>
+                            </div>
+                            <span class="badge bg-success">{{ product.get_discount_percentage }}% OFF</span>
+                        </div>
+                        <div class="d-grid">
+                            <a href="{{ product.get_absolute_url }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Testimonials -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>Happy Customers</h2>
+            <p class="text-muted">See what our customers are saying about group buying</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="mb-3 text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="card-text">"I saved over 40% on a high-end laptop by joining a group buy. The whole process was seamless, and the quality is exactly as described!"</p>
+                    <p class="text-muted">- Sarah Johnson</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="mb-3 text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="card-text">"GroupBuy made it possible for me to afford premium kitchen appliances for my new home. The wait was worth it for the incredible savings!"</p>
+                    <p class="text-muted">- Michael Chen</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="mb-3 text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="card-text">"I'm amazed at how simple the process is. I just paid my 5% deposit and waited for the MOQ to be reached. Got my products within two weeks after that!"</p>
+                    <p class="text-muted">- David Williams</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="bg-light p-5 rounded-3 text-center">
+                <h2>Ready to Save on Wholesale Prices?</h2>
+                <p class="lead">Join thousands of satisfied customers who are saving big through group buying.</p>
+                <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg">Shop Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

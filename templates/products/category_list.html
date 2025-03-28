@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load product_filters %}
+
+{% block title %}Product Categories | GroupBuy{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Enhanced Category Design */
+    .category-card {
+        border-radius: 15px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        transition: all 0.4s ease;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .category-img-container {
+        height: 220px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .category-img-container img {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
+        transition: transform 0.8s ease;
+    }
+    
+    .category-card:hover .category-img-container img {
+        transform: scale(1.05);
+    }
+    
+    .category-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-image: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        height: 50%;
+        transition: opacity 0.3s;
+    }
+    
+    .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        padding: 8px 16px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .category-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .category-description {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+        flex-grow: 1;
+    }
+    
+    .category-btn {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .category-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(74, 137, 220, 0.3);
+    }
+    
+    .hero-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 20px;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    
+    .promo-banner {
+        border-radius: 20px;
+        background: linear-gradient(135deg, #4A89DC 0%, #5D9CEC 100%);
+        overflow: hidden;
+        position: relative;
+        margin-top: 4rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 30px rgba(74, 137, 220, 0.3);
+    }
+    
+    .promo-content {
+        padding: 3rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .promo-shape {
+        position: absolute;
+        background-color: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+    
+    .shape-1 {
+        width: 200px;
+        height: 200px;
+        top: -50px;
+        right: -50px;
+    }
+    
+    .shape-2 {
+        width: 100px;
+        height: 100px;
+        bottom: 50px;
+        left: 50px;
+    }
+    
+    .promo-btn {
+        background-color: white;
+        color: #4A89DC;
+        font-weight: 600;
+        padding: 12px 25px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .promo-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+    }
+    
+    .icon-container {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(74, 137, 220, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .category-feature {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <section class="hero-section text-center mb-5">
+        <div class="container py-4">
+            <h1 class="display-4 fw-bold text-primary mb-4">Shop by Category</h1>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <p class="lead mb-4">Discover incredible wholesale deals across all our categories. Join group buys to unlock substantial savings on high-quality products.</p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-shopping-basket me-2"></i>Browse All Products
+                        </a>
+                        <a href="{% url 'pages:how_it_works' %}" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="fas fa-info-circle me-2"></i>How It Works
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Breadcrumbs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Categories</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Categories Section -->
+    <div class="row">
+        {% for category in categories %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 category-card">
+                    <div class="position-relative">
+                        {% if category.image %}
+                            <div class="category-img-container">
+                                <img src="{{ category.image }}" alt="{{ category.name }}">
+                                <div class="category-overlay"></div>
+                                <span class="badge bg-primary category-badge">
+                                    <i class="fas fa-tag me-1"></i>{{ category.products.count }} Products
+                                </span>
+                            </div>
+                        {% else %}
+                            <div class="category-img-container bg-light d-flex align-items-center justify-content-center">
+                                <i class="fas fa-folder fa-4x text-primary"></i>
+                                <span class="badge bg-primary category-badge">
+                                    <i class="fas fa-tag me-1"></i>{{ category.products.count }} Products
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column p-4">
+                        <h3 class="category-name">{{ category.name }}</h3>
+                        <p class="category-description">{{ category.description|truncatechars:120 }}</p>
+                        
+                        <div class="category-features mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="category-feature">Wholesale Prices</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="category-feature">Group Buying Power</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="category-feature">5% Deposit to Join</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{% url 'product_list' %}?category={{ category.slug }}" class="btn btn-primary btn-lg w-100 category-btn">
+                                <i class="fas fa-shopping-basket me-2"></i>Browse {{ category.name }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info p-5 text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-info-circle fa-3x"></i>
+                    </div>
+                    <h4 class="mb-3">No Categories Available</h4>
+                    <p class="mb-0">We're currently updating our catalog. Please check back later for exciting new group buy opportunities!</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Promotional Banner -->
+    <div class="promo-banner mt-5">
+        <div class="promo-shape shape-1"></div>
+        <div class="promo-shape shape-2"></div>
+        <div class="promo-content text-center text-white">
+            <h2 class="display-6 fw-bold mb-3">Save Up to 70% with Group Buys</h2>
+            <p class="lead mb-4">Join waitlists, pay just 5% upfront, and unlock wholesale pricing once we hit the minimum order quantity. No additional fees!</p>
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-4 col-sm-6 mb-3 mb-md-0">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="icon-container">
+                            <i class="fas fa-piggy-bank text-primary fa-lg"></i>
+                        </div>
+                        <h5 class="mb-2">Big Savings</h5>
+                        <p class="small mb-0">Pay wholesale prices, not retail</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6 mb-3 mb-md-0">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="icon-container">
+                            <i class="fas fa-shield-alt text-primary fa-lg"></i>
+                        </div>
+                        <h5 class="mb-2">Low Risk</h5>
+                        <p class="small mb-0">Only 5% deposit required</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="icon-container">
+                            <i class="fas fa-truck text-primary fa-lg"></i>
+                        </div>
+                        <h5 class="mb-2">Free Shipping</h5>
+                        <p class="small mb-0">On all group buy orders</p>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'pages:how_it_works' %}" class="btn promo-btn btn-lg">
+                <i class="fas fa-arrow-right me-2"></i>Learn How It Works
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

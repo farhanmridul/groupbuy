@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders | GroupBuy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Account</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="{% url 'dashboard' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="list-group-item active">
+                        <a href="{% url 'order_list' %}" class="text-decoration-none text-primary fw-bold">
+                            <i class="fas fa-shopping-bag me-2"></i> My Orders
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'waitlist_items' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-hourglass-half me-2"></i> My Waitlist
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'profile' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-user me-2"></i> Profile
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'addresses' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-map-marker-alt me-2"></i> Addresses
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'logout' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Orders</h5>
+                    <a href="{% url 'product_list' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-shopping-bag me-1"></i> Continue Shopping
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                        <tr>
+                                            <td>{{ order.order_number }}</td>
+                                            <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if order.status == 'pending' %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% elif order.status == 'processing' %}
+                                                    <span class="badge bg-info">Processing</span>
+                                                {% elif order.status == 'waiting_for_moq' %}
+                                                    <span class="badge bg-primary">Waiting for MOQ</span>
+                                                {% elif order.status == 'ready_to_ship' %}
+                                                    <span class="badge bg-success">Ready to Ship</span>
+                                                {% elif order.status == 'shipped' %}
+                                                    <span class="badge bg-info">Shipped</span>
+                                                {% elif order.status == 'delivered' %}
+                                                    <span class="badge bg-success">Delivered</span>
+                                                {% elif order.status == 'cancelled' %}
+                                                    <span class="badge bg-danger">Cancelled</span>
+                                                {% elif order.status == 'refunded' %}
+                                                    <span class="badge bg-secondary">Refunded</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>${{ order.total }}</td>
+                                            <td>
+                                                {% if order.payment_status == 'pending' %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% elif order.payment_status == 'deposit_paid' %}
+                                                    <span class="badge bg-success">Deposit Paid</span>
+                                                {% elif order.payment_status == 'full_payment' %}
+                                                    <span class="badge bg-success">Fully Paid</span>
+                                                {% elif order.payment_status == 'refunded' %}
+                                                    <span class="badge bg-secondary">Refunded</span>
+                                                {% elif order.payment_status == 'failed' %}
+                                                    <span class="badge bg-danger">Failed</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                {% if order.payment_status == 'deposit_paid' and order.status == 'ready_to_ship' %}
+                                                    <a href="#" class="btn btn-sm btn-outline-success">
+                                                        <i class="fas fa-credit-card"></i> Pay
+                                                    </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if orders.has_other_pages %}
+                            <nav aria-label="Page navigation" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    {% if orders.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in orders.paginator.page_range %}
+                                        {% if orders.number == num %}
+                                            <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                        {% else %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if orders.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                        
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+                            <h4>No Orders Yet</h4>
+                            <p class="mb-4">You haven't placed any orders yet.</p>
+                            <a href="{% url 'product_list' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag me-2"></i> Start Shopping
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

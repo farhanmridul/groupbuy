@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% block title %}Shopping Cart | GroupBuy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Cart</li>
+                </ol>
+            </nav>
+            <h1>Shopping Cart</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Cart Items -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Cart Items</h5>
+                </div>
+                <div class="card-body">
+                    {% if cart_items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart_items %}
+                                        <tr class="cart-item" data-item-id="{{ item.id }}">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% with image=item.product.images.filter.first %}
+                                                        {% if image %}
+                                                            <img src="{{ image.image }}" 
+                                                                 alt="{{ image.alt_text|default:item.product.title }}"
+                                                                 class="img-thumbnail me-3"
+                                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                                        {% else %}
+                                                            <div class="bg-light d-flex align-items-center justify-content-center me-3"
+                                                                 style="width: 60px; height: 60px;">
+                                                                <i class="fas fa-image text-secondary"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                    <div>
+                                                        <h6 class="mb-0">{{ item.product.title }}</h6>
+                                                        <small class="text-muted">
+                                                            {{ item.product.category.name }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <!-- Show market or wholesale price based on is_market_price -->
+                                                {% if item.is_market_price %}
+                                                    ৳{{ item.product.market_price }}
+                                                {% else %}
+                                                    ৳{{ item.product.wholesale_price }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="input-group input-group-sm" style="width: 120px;">
+                                                    <button class="btn btn-outline-secondary quantity-btn"
+                                                            type="button" data-action="decrease">-</button>
+                                                    <input type="number" class="form-control text-center quantity-input"
+                                                           value="{{ item.quantity }}" min="1"
+                                                           max="{{ item.product.stock }}">
+                                                    <button class="btn btn-outline-secondary quantity-btn"
+                                                            type="button" data-action="increase">+</button>
+                                                </div>
+                                            </td>
+                                            <td class="item-total">
+                                                <!-- get_total_price() must be defined in CartItem model -->
+                                                ৳{{ item.get_total_price }}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'remove_from_cart' item.id %}"
+                                                   class="btn btn-sm btn-outline-danger remove-item">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-3">
+                            <a href="{% url 'product_list' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+                            </a>
+                            <button id="update-cart-btn" class="btn btn-primary">
+                                <i class="fas fa-sync-alt me-2"></i> Update Cart
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                            <h4>Your cart is empty</h4>
+                            <p class="mb-4">Looks like you haven't added any products to your cart yet.</p>
+                            <a href="{% url 'product_list' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag me-2"></i> Browse Products
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Similar Products (Mobile) -->
+            {% if recommended_products %}
+                <div class="card mb-4 d-lg-none">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">You Might Also Like</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for product in recommended_products %}
+                                <div class="col-6 col-md-3 mb-3">
+                                    <div class="card h-100">
+                                        {% with image=product.images.filter.first %}
+                                            {% if image %}
+                                                <img src="{{ image.image }}" 
+                                                     alt="{{ image.alt_text|default:product.title }}"
+                                                     class="card-img-top"
+                                                     style="height: 120px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light d-flex align-items-center justify-content-center"
+                                                     style="height: 120px;">
+                                                     <i class="fas fa-image text-secondary fa-3x"></i>
+                                                </div>
+                                            {% endif %}
+                                        {% endwith %}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ product.title }}</h6>
+                                            <p class="card-text mb-2">
+                                                <span class="text-muted text-decoration-line-through">
+                                                    ৳{{ product.market_price }}
+                                                </span>
+                                                <span class="fw-bold ms-2">
+                                                    ৳{{ product.wholesale_price }}
+                                                </span>
+                                            </p>
+                                            <a href="{{ product.get_absolute_url }}"
+                                               class="btn btn-sm btn-outline-primary w-100">
+                                               View
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Order Summary -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span id="cart-subtotal">৳{{ cart.get_total_price }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span>৳10.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold mb-3">
+                        <span>Total</span>
+                        <span id="cart-total">
+                            ৳{{ cart.get_total_price|add:"10" }}
+                        </span>
+                    </div>
+                    
+                    {% if cart_items %}
+                        <div class="d-grid">
+                            <a href="{% url 'checkout' %}" class="btn btn-success">
+                                <i class="fas fa-lock me-2"></i> Proceed to Checkout
+                            </a>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt me-1"></i> Secure checkout
+                            </small>
+                        </div>
+                    {% else %}
+                        <div class="d-grid">
+                            <button class="btn btn-success" disabled>
+                                <i class="fas fa-lock me-2"></i> Proceed to Checkout
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Promo Code -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Have a Promo Code?</h5>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Enter code">
+                        <button class="btn btn-outline-primary" type="button">Apply</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Similar Products (Desktop) -->
+            {% if recommended_products %}
+                <div class="card d-none d-lg-block">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">You Might Also Like</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for product in recommended_products %}
+                            <div class="d-flex align-items-center mb-3">
+                                {% with image=product.images.filter.first %}
+                                    {% if image %}
+                                        <img src="{{ image.image }}"
+                                             alt="{{ image.alt_text|default:product.title }}"
+                                             class="me-3"
+                                             style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light me-3 d-flex align-items-center justify-content-center"
+                                             style="width: 60px; height: 60px;">
+                                            <i class="fas fa-image text-secondary"></i>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                                <div class="w-100">
+                                    <h6 class="mb-0">{{ product.title }}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted text-decoration-line-through">
+                                            ৳{{ product.market_price }}
+                                        </small>
+                                        <span class="fw-bold ms-2">
+                                            ৳{{ product.wholesale_price }}
+                                        </span>
+                                        <a href="{{ product.get_absolute_url }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                           View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Quantity buttons
+        $('.quantity-btn').click(function() {
+            var input = $(this).closest('.input-group').find('.quantity-input');
+            var currentVal = parseInt(input.val());
+            var action = $(this).data('action');
+            
+            if (action === 'increase') {
+                input.val(currentVal + 1);
+            } else if (action === 'decrease' && currentVal > 1) {
+                input.val(currentVal - 1);
+            }
+        });
+        
+        // Update cart button
+        $('#update-cart-btn').click(function() {
+            var updates = [];
+            
+            $('.cart-item').each(function() {
+                var itemId = $(this).data('item-id');
+                var quantity = $(this).find('.quantity-input').val();
+                
+                updates.push({
+                    itemId: itemId,
+                    quantity: quantity
+                });
+            });
+            
+            // Process updates sequentially
+            processUpdates(updates, 0);
+        });
+        
+        // Remove item with confirmation
+        $('.remove-item').click(function(e) {
+            if (!confirm('Are you sure you want to remove this item from your cart?')) {
+                e.preventDefault();
+            }
+        });
+        
+        // Function to process cart updates
+        function processUpdates(updates, index) {
+            if (index >= updates.length) {
+                // All updates processed, reload page
+                location.reload();
+                return;
+            }
+            
+            var update = updates[index];
+            
+            $.ajax({
+                type: 'POST',
+                url: '{% url "update_cart" %}',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'item_id': update.itemId,
+                    'quantity': update.quantity
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Update item total
+                        $('.cart-item[data-item-id="' + update.itemId + '"] .item-total')
+                            .text('৳' + response.item_total);
+                        
+                        // Update cart totals
+                        $('#cart-subtotal').text('৳' + response.cart_subtotal);
+                        
+                        // total = subtotal + 10 shipping
+                        const new_total = parseFloat(response.cart_subtotal) + 10;
+                        $('#cart-total').text('৳' + new_total.toFixed(2));
+                        
+                        // Process next update
+                        processUpdates(updates, index + 1);
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while updating the cart. Please try again.');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

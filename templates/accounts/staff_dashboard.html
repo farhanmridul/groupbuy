@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Dashboard | GroupBuy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Staff Dashboard</h1>
+            <p class="lead">Welcome to the GroupBuy staff dashboard. Manage orders, products, and more.</p>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <h1 class="display-4">{{ total_orders }}</h1>
+                    <p class="card-text">Total Orders</p>
+                </div>
+                <div class="card-footer d-grid">
+                    <a href="{% url 'admin:orders_order_changelist' %}" class="btn btn-light btn-sm">View All</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body text-center">
+                    <h1 class="display-4">{{ pending_orders }}</h1>
+                    <p class="card-text">Pending Orders</p>
+                </div>
+                <div class="card-footer d-grid">
+                    <a href="{% url 'admin:orders_order_changelist' %}?status__exact=pending" class="btn btn-light btn-sm">Process</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <h1 class="display-4">{{ moq_waiting }}</h1>
+                    <p class="card-text">Waiting for MOQ</p>
+                </div>
+                <div class="card-footer d-grid">
+                    <a href="{% url 'admin:orders_order_changelist' %}?status__exact=waiting_for_moq" class="btn btn-light btn-sm">View</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <h1 class="display-4">
+                        <i class="fas fa-chart-line"></i>
+                    </h1>
+                    <p class="card-text">Revenue Dashboard</p>
+                </div>
+                <div class="card-footer d-grid">
+                    <a href="#" class="btn btn-light btn-sm">Analytics</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <!-- Recent Orders -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Orders</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- This would be populated from the database in a real implementation -->
+                                <tr>
+                                    <td>ORD-12345678</td>
+                                    <td>John Doe</td>
+                                    <td>Mar 15, 2023</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>$249.99</td>
+                                    <td>
+                                        <a href="{% url 'admin:orders_order_change' 1 %}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>ORD-87654321</td>
+                                    <td>Jane Smith</td>
+                                    <td>Mar 14, 2023</td>
+                                    <td><span class="badge bg-primary">Waiting for MOQ</span></td>
+                                    <td>$199.50</td>
+                                    <td>
+                                        <a href="{% url 'admin:orders_order_change' 1 %}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>ORD-56781234</td>
+                                    <td>Michael Brown</td>
+                                    <td>Mar 12, 2023</td>
+                                    <td><span class="badge bg-success">Ready to Ship</span></td>
+                                    <td>$599.99</td>
+                                    <td>
+                                        <a href="{% url 'admin:orders_order_change' 1 %}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="{% url 'admin:orders_order_changelist' %}" class="btn btn-primary btn-sm">View All Orders</a>
+                </div>
+            </div>
+            
+            <!-- MOQ Progress -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Active Group Buys</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Batch #</th>
+                                    <th>Progress</th>
+                                    <th>Remaining</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- This would be populated from the database in a real implementation -->
+                                <tr>
+                                    <td>Premium Laptop</td>
+                                    <td>Batch #3</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 75%;" 
+                                                aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                                75%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>5 of 20</td>
+                                    <td>
+                                        <a href="{% url 'admin:products_productbatch_change' 1 %}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Smart Watch</td>
+                                    <td>Batch #2</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 50%;" 
+                                                aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                                50%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>25 of 50</td>
+                                    <td>
+                                        <a href="{% url 'admin:products_productbatch_change' 1 %}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>4K TV</td>
+                                    <td>Batch #1</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 90%;" 
+                                                aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">
+                                                90%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>2 of 20</td>
+                                    <td>
+                                        <a href="{% url 'admin:products_productbatch_change' 1 %}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="{% url 'admin:products_productbatch_changelist' %}" class="btn btn-primary btn-sm">View All Batches</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Quick Links -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'admin:products_product_add' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus-circle me-2"></i> Add New Product
+                        </a>
+                        <a href="{% url 'admin:products_category_add' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-folder-plus me-2"></i> Add New Category
+                        </a>
+                        <a href="{% url 'admin:accounts_user_add' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-plus me-2"></i> Add New User
+                        </a>
+                        <a href="{% url 'admin:products_review_changelist' %}?is_approved__exact=0" class="list-group-item list-group-item-action">
+                            <i class="fas fa-star me-2"></i> Approve Reviews
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                            <div>
+                                <div class="fw-bold">New order received</div>
+                                <span class="text-muted small">Order #ORD-12345678</span>
+                            </div>
+                            <span class="text-muted small">5 mins ago</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                            <div>
+                                <div class="fw-bold">Laptop batch reached MOQ</div>
+                                <span class="text-muted small">Batch #3 is ready to ship</span>
+                            </div>
+                            <span class="text-muted small">1 hour ago</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                            <div>
+                                <div class="fw-bold">New product added</div>
+                                <span class="text-muted small">4K TV - OLED 65"</span>
+                            </div>
+                            <span class="text-muted small">Yesterday</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                            <div>
+                                <div class="fw-bold">New review submitted</div>
+                                <span class="text-muted small">Awaiting approval</span>
+                            </div>
+                            <span class="text-muted small">Yesterday</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                            <div>
+                                <div class="fw-bold">5 orders shipped</div>
+                                <span class="text-muted small">Tracking information sent</span>
+                            </div>
+                            <span class="text-muted small">2 days ago</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}My Waitlist | GroupBuy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Account</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="{% url 'dashboard' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'order_list' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-shopping-bag me-2"></i> My Orders
+                        </a>
+                    </li>
+                    <li class="list-group-item active">
+                        <a href="{% url 'waitlist_items' %}" class="text-decoration-none text-primary fw-bold">
+                            <i class="fas fa-hourglass-half me-2"></i> My Waitlist
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'profile' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-user me-2"></i> Profile
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'addresses' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-map-marker-alt me-2"></i> Addresses
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'logout' %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Waitlist Items</h5>
+                    <a href="{% url 'product_list' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-shopping-bag me-1"></i> Browse Products
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if waitlist_items %}
+                        <div class="alert alert-info mb-4">
+                            <h6 class="alert-heading"><i class="fas fa-info-circle"></i> About the Waitlist</h6>
+                            <p class="mb-0">Products in your waitlist are part of group buys. Once the minimum order quantity (MOQ) is reached, you'll be notified to complete your payment.</p>
+                        </div>
+                        
+                        {% for item in waitlist_items %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3 mb-md-0">
+                                            {% with image=item.batch.product.images.filter.first %}
+                                                {% if image %}
+                                                    <img src="{{ image.image }}" alt="{{ image.alt_text|default:item.batch.product.title }}" class="img-fluid rounded">
+                                                {% else %}
+                                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                                                        <i class="fas fa-image fa-3x text-secondary"></i>
+                                                    </div>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                        <div class="col-md-5">
+                                            <h5>
+                                                <a href="{{ item.batch.product.get_absolute_url }}" class="text-decoration-none">{{ item.batch.product.title }}</a>
+                                            </h5>
+                                            <p class="mb-1">Batch #{{ item.batch.batch_number }}</p>
+                                            <p class="mb-1">
+                                                <span class="text-muted">Price:</span> 
+                                                <span class="text-decoration-line-through me-1">${{ item.batch.product.market_price }}</span>
+                                                <span class="fw-bold text-primary">${{ item.batch.product.wholesale_price }}</span>
+                                            </p>
+                                            <p class="mb-1">
+                                                <span class="text-muted">Quantity:</span> {{ item.quantity }}
+                                            </p>
+                                            <p class="mb-1">
+                                                <span class="text-muted">Deposit:</span> 
+                                                {% if item.deposit_paid %}
+                                                    <span class="badge bg-success">Paid</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% endif %}
+                                            </p>
+                                            <p class="mb-0">
+                                                <span class="text-muted">Added:</span> {{ item.created_at|date:"M d, Y" }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6>MOQ Progress</h6>
+                                            <div class="progress mb-2" style="height: 25px;">
+                                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                                    role="progressbar" 
+                                                    style="width: {{ item.batch.get_progress_percentage }}%;" 
+                                                    aria-valuenow="{{ item.batch.get_progress_percentage }}" 
+                                                    aria-valuemin="0" 
+                                                    aria-valuemax="100">
+                                                    {{ item.batch.get_progress_percentage }}%
+                                                </div>
+                                            </div>
+                                            <p class="small text-muted mb-2">
+                                                {{ item.batch.current_quantity }} of {{ item.batch.target_quantity }} orders - 
+                                                Need {{ item.batch.get_remaining_quantity }} more!
+                                            </p>
+                                            
+                                            {% if item.batch.is_fulfilled %}
+                                                <div class="alert alert-success py-2 mb-2">
+                                                    <small><i class="fas fa-check-circle"></i> MOQ reached! Ready to ship.</small>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <div class="d-grid gap-2">
+                                                <a href="{{ item.batch.product.get_absolute_url }}" class="btn btn-sm btn-outline-primary">View Product</a>
+                                                {% if not item.deposit_paid %}
+                                                    <a href="#" class="btn btn-sm btn-success">Pay Deposit</a>
+                                                {% elif item.batch.is_fulfilled %}
+                                                    <a href="#" class="btn btn-sm btn-success">Pay Remaining Balance</a>
+                                                {% endif %}
+                                                {% if not item.batch.is_fulfilled %}
+                                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveWaitlistModal{{ item.id }}">
+                                                        Leave Waitlist
+                                                    </button>
+                                                    
+                                                    <!-- Leave Waitlist Modal -->
+                                                    <div class="modal fade" id="leaveWaitlistModal{{ item.id }}" tabindex="-1" aria-labelledby="leaveWaitlistModalLabel{{ item.id }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header bg-danger text-white">
+                                                                    <h5 class="modal-title" id="leaveWaitlistModalLabel{{ item.id }}">Leave Waitlist</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p>Are you sure you want to leave the waitlist for {{ item.batch.product.title }}?</p>
+                                                                    <p>If you leave now:</p>
+                                                                    <ul>
+                                                                        <li>Your deposit may be refunded, subject to our cancellation policy.</li>
+                                                                        <li>You will lose your place in the waitlist.</li>
+                                                                        <li>If you change your mind, you'll need to join the waitlist again.</li>
+                                                                    </ul>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="button" class="btn btn-danger">Confirm</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-hourglass-half fa-4x text-muted mb-3"></i>
+                            <h4>No Waitlist Items</h4>
+                            <p class="mb-4">You're not in any waitlists yet. Browse our products and join a group buy to enjoy wholesale prices!</p>
+                            <a href="{% url 'product_list' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag me-2"></i> Browse Group Buys
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
