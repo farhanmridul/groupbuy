@@ -1,0 +1,71 @@
+name: groupbuy
+description: GroupBuy Mobile App - Shop wholesale prices through group buys
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # UI packages
+  cupertino_icons: ^1.0.5
+  flutter_svg: ^2.0.7
+  cached_network_image: ^3.2.3
+  flutter_rating_bar: ^4.0.1
+  shimmer: ^3.0.0
+  carousel_slider: ^4.2.1
+  flutter_progress_hud: ^2.0.2
+  
+  # State Management
+  provider: ^6.0.5
+  flutter_bloc: ^8.1.3
+  
+  # Networking
+  http: ^1.1.0
+  dio: ^5.3.2
+  json_annotation: ^4.8.1
+  
+  # Local Storage
+  shared_preferences: ^2.2.0
+  path_provider: ^2.1.0
+  
+  # Authentication
+  flutter_secure_storage: ^8.0.0
+  
+  # Utils
+  intl: ^0.18.1
+  logger: ^1.4.0
+  url_launcher: ^6.1.12
+  package_info_plus: ^4.1.0
+  share_plus: ^7.1.0
+  connectivity_plus: ^4.0.2
+  device_info_plus: ^9.0.3
+  
+  # Other
+  flutter_dotenv: ^5.1.0
+  flutter_spinkit: ^5.2.0
+  flutter_local_notifications: ^15.1.0+1
+  webview_flutter: ^4.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.2
+  build_runner: ^2.4.6
+  json_serializable: ^6.7.1
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
